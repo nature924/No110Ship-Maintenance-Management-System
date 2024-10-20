@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ChengbenDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.guzhang_id as guzhangId
+        ,a.chengben_uuid_number as chengbenUuidNumber
+        ,a.chengben_types as chengbenTypes
+        ,a.chengben_file as chengbenFile
+        ,a.chengben_jine as chengbenJine
+        ,a.chengben_time as chengbenTime
+        ,a.chengben_content as chengbenContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ChengbenView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,guzhang.weibaorenyuan_id as guzhangWeibaorenyuanId
+        ,guzhang.guzhang_uuid_number as guzhangUuidNumber
+        ,guzhang.guzhang_name as guzhangName
+        ,guzhang.guzhang_photo as guzhangPhoto
+        ,guzhang.guzhang_address as guzhangAddress
+        ,guzhang.guzhang_types as guzhangTypes
+        ,guzhang.guzhang_content as guzhangContent
+        ,guzhang.guzhang_zhuangtai_types as guzhangZhuangtaiTypes
+        ,guzhang.guzhang_text as guzhangText
+
+        FROM chengben  a
+        left JOIN guzhang guzhang ON a.guzhang_id = guzhang.id
+        left JOIN chaunbo chaunbo ON guzhang.chaunbo_id = chaunbo.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.guzhangId != null and params.guzhangId != ''">
+                and (
+                    a.guzhang_id = #{params.guzhangId}
+                )
+            </if>
+            <if test="params.weibaogongsiId != null and params.weibaogongsiId != ''">
+                and (
+                    chaunbo.weibaogongsi_id = #{params.weibaogongsiId}
+                )
+            </if>
+            <if test=" params.chengbenUuidNumber != '' and params.chengbenUuidNumber != null and params.chengbenUuidNumber != 'null' ">
+                and a.chengben_uuid_number like CONCAT('%',#{params.chengbenUuidNumber},'%')
+            </if>
+            <if test="params.chengbenTypes != null and params.chengbenTypes != ''">
+                and a.chengben_types = #{params.chengbenTypes}
+            </if>
+            <if test="params.chengbenJineStart != null ">
+                <![CDATA[  and a.chengben_jine >= #{params.chengbenJineStart}   ]]>
+            </if>
+            <if test="params.chengbenJineEnd != null ">
+                <![CDATA[  and a.chengben_jine <= #{params.chengbenJineEnd}   ]]>
+            </if>
+            <if test="params.chengbenJine != null and params.chengbenJine != ''">
+                and a.chengben_jine = #{params.chengbenJine}
+            </if>
+            <if test=" params.chengbenTimeStart != '' and params.chengbenTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.chengben_time) >= UNIX_TIMESTAMP(#{params.chengbenTimeStart}) ]]>
+            </if>
+            <if test=" params.chengbenTimeEnd != '' and params.chengbenTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.chengben_time) <= UNIX_TIMESTAMP(#{params.chengbenTimeEnd}) ]]>
+            </if>
+            <if test="params.chengbenTime != null and params.chengbenTime != ''">
+                and a.chengben_time = #{params.chengbenTime}
+            </if>
+            <if test=" params.chengbenContent != '' and params.chengbenContent != null and params.chengbenContent != 'null' ">
+                and a.chengben_content like CONCAT('%',#{params.chengbenContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+
+                <!-- 判断故障上报的id不为空 -->
+            <if test=" params.guzhangIdNotNull != '' and params.guzhangIdNotNull != null and params.guzhangIdNotNull != 'null' ">
+                and a.guzhang_id IS NOT NULL
+            </if>
+            <if test="params.chaunboId != null  and params.chaunboId != ''">
+                and guzhang.chaunbo_id = #{params.chaunboId}
+            </if>
+            <if test="params.weibaorenyuanId != null  and params.weibaorenyuanId != ''">
+                and guzhang.weibaorenyuan_id = #{params.weibaorenyuanId}
+            </if>
+            <if test=" params.guzhangUuidNumber != '' and params.guzhangUuidNumber != null and params.guzhangUuidNumber != 'null' ">
+                and guzhang.guzhang_uuid_number like CONCAT('%',#{params.guzhangUuidNumber},'%')
+            </if>
+            <if test=" params.guzhangName != '' and params.guzhangName != null and params.guzhangName != 'null' ">
+                and guzhang.guzhang_name like CONCAT('%',#{params.guzhangName},'%')
+            </if>
+            <if test=" params.guzhangAddress != '' and params.guzhangAddress != null and params.guzhangAddress != 'null' ">
+                and guzhang.guzhang_address like CONCAT('%',#{params.guzhangAddress},'%')
+            </if>
+            <if test="params.guzhangTypes != null  and params.guzhangTypes != ''">
+                and guzhang.guzhang_types = #{params.guzhangTypes}
+            </if>
+
+            <if test=" params.guzhangContent != '' and params.guzhangContent != null and params.guzhangContent != 'null' ">
+                and guzhang.guzhang_content like CONCAT('%',#{params.guzhangContent},'%')
+            </if>
+            <if test="params.guzhangZhuangtaiTypes != null  and params.guzhangZhuangtaiTypes != ''">
+                and guzhang.guzhang_zhuangtai_types = #{params.guzhangZhuangtaiTypes}
+            </if>
+
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(guzhang.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(guzhang.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+            <if test=" params.guzhangText != '' and params.guzhangText != null and params.guzhangText != 'null' ">
+                and guzhang.guzhang_text like CONCAT('%',#{params.guzhangText},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

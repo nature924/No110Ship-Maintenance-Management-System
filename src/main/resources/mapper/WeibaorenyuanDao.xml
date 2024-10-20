@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.WeibaorenyuanDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.weibaogongsi_id as weibaogongsiId
+        ,a.username as username
+        ,a.password as password
+        ,a.weibaorenyuan_uuid_number as weibaorenyuanUuidNumber
+        ,a.weibaorenyuan_name as weibaorenyuanName
+        ,a.weibaorenyuan_phone as weibaorenyuanPhone
+        ,a.weibaorenyuan_id_number as weibaorenyuanIdNumber
+        ,a.weibaorenyuan_photo as weibaorenyuanPhoto
+        ,a.sex_types as sexTypes
+        ,a.weibaorenyuan_email as weibaorenyuanEmail
+        ,a.jinyong_types as jinyongTypes
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.WeibaorenyuanView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,weibaogongsi.weibaogongsi_uuid_number as weibaogongsiUuidNumber
+        ,weibaogongsi.weibaogongsi_name as weibaogongsiName
+        ,weibaogongsi.weibaogongsi_fuzeren as weibaogongsiFuzeren
+        ,weibaogongsi.weibaogongsi_phone as weibaogongsiPhone
+        ,weibaogongsi.weibaogongsi_photo as weibaogongsiPhoto
+        ,weibaogongsi.weibaogongsi_address as weibaogongsiAddress
+        ,weibaogongsi.jinyong_types as jinyongTypes
+
+        FROM weibaorenyuan  a
+        left JOIN weibaogongsi weibaogongsi ON a.weibaogongsi_id = weibaogongsi.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.weibaogongsiId != null and params.weibaogongsiId != ''">
+                and (
+                    a.weibaogongsi_id = #{params.weibaogongsiId}
+                )
+            </if>
+            <if test=" params.username != '' and params.username != null and params.username != 'null' ">
+                and a.username like CONCAT('%',#{params.username},'%')
+            </if>
+            <if test=" params.password != '' and params.password != null and params.password != 'null' ">
+                and a.password like CONCAT('%',#{params.password},'%')
+            </if>
+            <if test=" params.weibaorenyuanUuidNumber != '' and params.weibaorenyuanUuidNumber != null and params.weibaorenyuanUuidNumber != 'null' ">
+                and a.weibaorenyuan_uuid_number like CONCAT('%',#{params.weibaorenyuanUuidNumber},'%')
+            </if>
+            <if test=" params.weibaorenyuanName != '' and params.weibaorenyuanName != null and params.weibaorenyuanName != 'null' ">
+                and a.weibaorenyuan_name like CONCAT('%',#{params.weibaorenyuanName},'%')
+            </if>
+            <if test=" params.weibaorenyuanPhone != '' and params.weibaorenyuanPhone != null and params.weibaorenyuanPhone != 'null' ">
+                and a.weibaorenyuan_phone like CONCAT('%',#{params.weibaorenyuanPhone},'%')
+            </if>
+            <if test=" params.weibaorenyuanIdNumber != '' and params.weibaorenyuanIdNumber != null and params.weibaorenyuanIdNumber != 'null' ">
+                and a.weibaorenyuan_id_number like CONCAT('%',#{params.weibaorenyuanIdNumber},'%')
+            </if>
+            <if test="params.sexTypes != null and params.sexTypes != ''">
+                and a.sex_types = #{params.sexTypes}
+            </if>
+            <if test=" params.weibaorenyuanEmail != '' and params.weibaorenyuanEmail != null and params.weibaorenyuanEmail != 'null' ">
+                and a.weibaorenyuan_email like CONCAT('%',#{params.weibaorenyuanEmail},'%')
+            </if>
+            <if test="params.jinyongTypes != null and params.jinyongTypes != ''">
+                and a.jinyong_types = #{params.jinyongTypes}
+            </if>
+
+                <!-- 判断维保公司的id不为空 -->
+            <if test=" params.weibaogongsiIdNotNull != '' and params.weibaogongsiIdNotNull != null and params.weibaogongsiIdNotNull != 'null' ">
+                and a.weibaogongsi_id IS NOT NULL
+            </if>
+            <if test=" params.weibaogongsiUuidNumber != '' and params.weibaogongsiUuidNumber != null and params.weibaogongsiUuidNumber != 'null' ">
+                and weibaogongsi.weibaogongsi_uuid_number like CONCAT('%',#{params.weibaogongsiUuidNumber},'%')
+            </if>
+            <if test=" params.weibaogongsiName != '' and params.weibaogongsiName != null and params.weibaogongsiName != 'null' ">
+                and weibaogongsi.weibaogongsi_name like CONCAT('%',#{params.weibaogongsiName},'%')
+            </if>
+            <if test=" params.weibaogongsiFuzeren != '' and params.weibaogongsiFuzeren != null and params.weibaogongsiFuzeren != 'null' ">
+                and weibaogongsi.weibaogongsi_fuzeren like CONCAT('%',#{params.weibaogongsiFuzeren},'%')
+            </if>
+            <if test=" params.weibaogongsiPhone != '' and params.weibaogongsiPhone != null and params.weibaogongsiPhone != 'null' ">
+                and weibaogongsi.weibaogongsi_phone like CONCAT('%',#{params.weibaogongsiPhone},'%')
+            </if>
+            <if test=" params.weibaogongsiAddress != '' and params.weibaogongsiAddress != null and params.weibaogongsiAddress != 'null' ">
+                and weibaogongsi.weibaogongsi_address like CONCAT('%',#{params.weibaogongsiAddress},'%')
+            </if>
+            <if test="params.jinyongTypes != null  and params.jinyongTypes != ''">
+                and weibaogongsi.jinyong_types = #{params.jinyongTypes}
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

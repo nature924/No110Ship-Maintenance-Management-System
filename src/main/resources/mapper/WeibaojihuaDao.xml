@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.WeibaojihuaDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.chaunbo_id as chaunboId
+        ,a.weibaogongsi_id as weibaogongsiId
+        ,a.weibaorenyuan_id as weibaorenyuanId
+        ,a.weibaojihua_uuid_number as weibaojihuaUuidNumber
+        ,a.weibaojihua_name as weibaojihuaName
+        ,a.weibaojihua_file as weibaojihuaFile
+        ,a.weibaojihua_types as weibaojihuaTypes
+        ,a.weibaojihua_buwei as weibaojihuaBuwei
+        ,a.weibao_time as weibaoTime
+        ,a.weibaojihua_address as weibaojihuaAddress
+        ,a.weibaojihua_content as weibaojihuaContent
+        ,a.insert_time as insertTime
+        ,a.weibaojihua_yesno_types as weibaojihuaYesnoTypes
+        ,a.weibaojihua_yesno_text as weibaojihuaYesnoText
+        ,a.weibaojihua_shenhe_time as weibaojihuaShenheTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.WeibaojihuaView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,chaunbo.chuanjia_id as chaunboChuanjiaId
+        ,chaunbo.weibaogongsi_id as chaunboWeibaogongsiId
+        ,chaunbo.chaunbo_uuid_number as chaunboUuidNumber
+        ,chaunbo.chaunbo_name as chaunboName
+        ,chaunbo.chaunbo_photo as chaunboPhoto
+        ,chaunbo.chaunbo_file as chaunboFile
+        ,chaunbo.chaunbo_types as chaunboTypes
+        ,chaunbo.chaunbo_zhuangtai_types as chaunboZhuangtaiTypes
+        ,chaunbo.chaunbo_content as chaunboContent
+        ,weibaogongsi.weibaogongsi_uuid_number as weibaogongsiUuidNumber
+        ,weibaogongsi.weibaogongsi_name as weibaogongsiName
+        ,weibaogongsi.weibaogongsi_fuzeren as weibaogongsiFuzeren
+        ,weibaogongsi.weibaogongsi_phone as weibaogongsiPhone
+        ,weibaogongsi.weibaogongsi_photo as weibaogongsiPhoto
+        ,weibaogongsi.weibaogongsi_address as weibaogongsiAddress
+        ,weibaogongsi.jinyong_types as jinyongTypes
+        ,weibaorenyuan.weibaogongsi_id as weibaorenyuanWeibaogongsiId
+        ,weibaorenyuan.weibaorenyuan_uuid_number as weibaorenyuanUuidNumber
+        ,weibaorenyuan.weibaorenyuan_name as weibaorenyuanName
+        ,weibaorenyuan.weibaorenyuan_phone as weibaorenyuanPhone
+        ,weibaorenyuan.weibaorenyuan_id_number as weibaorenyuanIdNumber
+        ,weibaorenyuan.weibaorenyuan_photo as weibaorenyuanPhoto
+        ,weibaorenyuan.weibaorenyuan_email as weibaorenyuanEmail
+        ,weibaorenyuan.jinyong_types as jinyongTypes
+
+        FROM weibaojihua  a
+        left JOIN chaunbo chaunbo ON a.chaunbo_id = chaunbo.id
+        left JOIN weibaogongsi weibaogongsi ON a.weibaogongsi_id = weibaogongsi.id
+        left JOIN weibaorenyuan weibaorenyuan ON a.weibaorenyuan_id = weibaorenyuan.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.chaunboId != null and params.chaunboId != ''">
+                and (
+                    a.chaunbo_id = #{params.chaunboId}
+                )
+            </if>
+            <if test="params.weibaogongsiId != null and params.weibaogongsiId != ''">
+                and (
+                    a.weibaogongsi_id = #{params.weibaogongsiId}
+                    or chaunbo.weibaogongsi_id = #{params.weibaogongsiId}
+                    or weibaorenyuan.weibaogongsi_id = #{params.weibaogongsiId}
+                )
+            </if>
+            <if test="params.weibaorenyuanId != null and params.weibaorenyuanId != ''">
+                and (
+                    a.weibaorenyuan_id = #{params.weibaorenyuanId}
+                )
+            </if>
+            <if test=" params.weibaojihuaUuidNumber != '' and params.weibaojihuaUuidNumber != null and params.weibaojihuaUuidNumber != 'null' ">
+                and a.weibaojihua_uuid_number like CONCAT('%',#{params.weibaojihuaUuidNumber},'%')
+            </if>
+            <if test=" params.weibaojihuaName != '' and params.weibaojihuaName != null and params.weibaojihuaName != 'null' ">
+                and a.weibaojihua_name like CONCAT('%',#{params.weibaojihuaName},'%')
+            </if>
+            <if test="params.weibaojihuaTypes != null and params.weibaojihuaTypes != ''">
+                and a.weibaojihua_types = #{params.weibaojihuaTypes}
+            </if>
+            <if test=" params.weibaojihuaBuwei != '' and params.weibaojihuaBuwei != null and params.weibaojihuaBuwei != 'null' ">
+                and a.weibaojihua_buwei like CONCAT('%',#{params.weibaojihuaBuwei},'%')
+            </if>
+            <if test=" params.weibaoTimeStart != '' and params.weibaoTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.weibao_time) >= UNIX_TIMESTAMP(#{params.weibaoTimeStart}) ]]>
+            </if>
+            <if test=" params.weibaoTimeEnd != '' and params.weibaoTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.weibao_time) <= UNIX_TIMESTAMP(#{params.weibaoTimeEnd}) ]]>
+            </if>
+            <if test="params.weibaoTime != null and params.weibaoTime != ''">
+                and a.weibao_time = #{params.weibaoTime}
+            </if>
+            <if test=" params.weibaojihuaAddress != '' and params.weibaojihuaAddress != null and params.weibaojihuaAddress != 'null' ">
+                and a.weibaojihua_address like CONCAT('%',#{params.weibaojihuaAddress},'%')
+            </if>
+            <if test=" params.weibaojihuaContent != '' and params.weibaojihuaContent != null and params.weibaojihuaContent != 'null' ">
+                and a.weibaojihua_content like CONCAT('%',#{params.weibaojihuaContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+            <if test="params.weibaojihuaYesnoTypes != null and params.weibaojihuaYesnoTypes != ''">
+                and a.weibaojihua_yesno_types = #{params.weibaojihuaYesnoTypes}
+            </if>
+            <if test=" params.weibaojihuaYesnoText != '' and params.weibaojihuaYesnoText != null and params.weibaojihuaYesnoText != 'null' ">
+                and a.weibaojihua_yesno_text like CONCAT('%',#{params.weibaojihuaYesnoText},'%')
+            </if>
+            <if test=" params.weibaojihuaShenheTimeStart != '' and params.weibaojihuaShenheTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.weibaojihua_shenhe_time) >= UNIX_TIMESTAMP(#{params.weibaojihuaShenheTimeStart}) ]]>
+            </if>
+            <if test=" params.weibaojihuaShenheTimeEnd != '' and params.weibaojihuaShenheTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.weibaojihua_shenhe_time) <= UNIX_TIMESTAMP(#{params.weibaojihuaShenheTimeEnd}) ]]>
+            </if>
+            <if test="params.weibaojihuaShenheTime != null and params.weibaojihuaShenheTime != ''">
+                and a.weibaojihua_shenhe_time = #{params.weibaojihuaShenheTime}
+            </if>
+
+                <!-- 判断船舶的id不为空 -->
+            <if test=" params.chaunboIdNotNull != '' and params.chaunboIdNotNull != null and params.chaunboIdNotNull != 'null' ">
+                and a.chaunbo_id IS NOT NULL
+            </if>
+            <if test="params.chuanjiaId != null  and params.chuanjiaId != ''">
+                and chaunbo.chuanjia_id = #{params.chuanjiaId}
+            </if>
+            <if test=" params.chaunboUuidNumber != '' and params.chaunboUuidNumber != null and params.chaunboUuidNumber != 'null' ">
+                and chaunbo.chaunbo_uuid_number like CONCAT('%',#{params.chaunboUuidNumber},'%')
+            </if>
+            <if test=" params.chaunboName != '' and params.chaunboName != null and params.chaunboName != 'null' ">
+                and chaunbo.chaunbo_name like CONCAT('%',#{params.chaunboName},'%')
+            </if>
+            <if test="params.chaunboTypes != null  and params.chaunboTypes != ''">
+                and chaunbo.chaunbo_types = #{params.chaunboTypes}
+            </if>
+
+            <if test="params.chaunboZhuangtaiTypes != null  and params.chaunboZhuangtaiTypes != ''">
+                and chaunbo.chaunbo_zhuangtai_types = #{params.chaunboZhuangtaiTypes}
+            </if>
+
+            <if test=" params.chaunboContent != '' and params.chaunboContent != null and params.chaunboContent != 'null' ">
+                and chaunbo.chaunbo_content like CONCAT('%',#{params.chaunboContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(chaunbo.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(chaunbo.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+                <!-- 判断维保公司的id不为空 -->
+            <if test=" params.weibaogongsiIdNotNull != '' and params.weibaogongsiIdNotNull != null and params.weibaogongsiIdNotNull != 'null' ">
+                and a.weibaogongsi_id IS NOT NULL
+            </if>
+            <if test=" params.weibaogongsiUuidNumber != '' and params.weibaogongsiUuidNumber != null and params.weibaogongsiUuidNumber != 'null' ">
+                and weibaogongsi.weibaogongsi_uuid_number like CONCAT('%',#{params.weibaogongsiUuidNumber},'%')
+            </if>
+            <if test=" params.weibaogongsiName != '' and params.weibaogongsiName != null and params.weibaogongsiName != 'null' ">
+                and weibaogongsi.weibaogongsi_name like CONCAT('%',#{params.weibaogongsiName},'%')
+            </if>
+            <if test=" params.weibaogongsiFuzeren != '' and params.weibaogongsiFuzeren != null and params.weibaogongsiFuzeren != 'null' ">
+                and weibaogongsi.weibaogongsi_fuzeren like CONCAT('%',#{params.weibaogongsiFuzeren},'%')
+            </if>
+            <if test=" params.weibaogongsiPhone != '' and params.weibaogongsiPhone != null and params.weibaogongsiPhone != 'null' ">
+                and weibaogongsi.weibaogongsi_phone like CONCAT('%',#{params.weibaogongsiPhone},'%')
+            </if>
+            <if test=" params.weibaogongsiAddress != '' and params.weibaogongsiAddress != null and params.weibaogongsiAddress != 'null' ">
+                and weibaogongsi.weibaogongsi_address like CONCAT('%',#{params.weibaogongsiAddress},'%')
+            </if>
+            <if test="params.jinyongTypes != null  and params.jinyongTypes != ''">
+                and weibaogongsi.jinyong_types = #{params.jinyongTypes}
+            </if>
+
+                <!-- 判断维保人员的id不为空 -->
+            <if test=" params.weibaorenyuanIdNotNull != '' and params.weibaorenyuanIdNotNull != null and params.weibaorenyuanIdNotNull != 'null' ">
+                and a.weibaorenyuan_id IS NOT NULL
+            </if>
+            <if test=" params.weibaorenyuanUuidNumber != '' and params.weibaorenyuanUuidNumber != null and params.weibaorenyuanUuidNumber != 'null' ">
+                and weibaorenyuan.weibaorenyuan_uuid_number like CONCAT('%',#{params.weibaorenyuanUuidNumber},'%')
+            </if>
+            <if test=" params.weibaorenyuanName != '' and params.weibaorenyuanName != null and params.weibaorenyuanName != 'null' ">
+                and weibaorenyuan.weibaorenyuan_name like CONCAT('%',#{params.weibaorenyuanName},'%')
+            </if>
+            <if test=" params.weibaorenyuanPhone != '' and params.weibaorenyuanPhone != null and params.weibaorenyuanPhone != 'null' ">
+                and weibaorenyuan.weibaorenyuan_phone like CONCAT('%',#{params.weibaorenyuanPhone},'%')
+            </if>
+            <if test=" params.weibaorenyuanIdNumber != '' and params.weibaorenyuanIdNumber != null and params.weibaorenyuanIdNumber != 'null' ">
+                and weibaorenyuan.weibaorenyuan_id_number like CONCAT('%',#{params.weibaorenyuanIdNumber},'%')
+            </if>
+            <if test=" params.weibaorenyuanEmail != '' and params.weibaorenyuanEmail != null and params.weibaorenyuanEmail != 'null' ">
+                and weibaorenyuan.weibaorenyuan_email like CONCAT('%',#{params.weibaorenyuanEmail},'%')
+            </if>
+            <if test="params.jinyongTypes != null  and params.jinyongTypes != ''">
+                and weibaorenyuan.jinyong_types = #{params.jinyongTypes}
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
